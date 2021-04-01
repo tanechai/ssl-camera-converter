@@ -13,7 +13,7 @@ int main(){
         cv::VideoCapture camera(i);
         if(camera.isOpened()){
             cameras.emplace_back(camera);
-            std::cout << "camera " << i << " is opened" << std::endl;
+            std::cout << "Camera " << i << " is opened." << std::endl;
         }
     }
     
@@ -24,9 +24,8 @@ int main(){
     Initializer initializer(cameras,robotHeight,patternSize,squareSize,fieldImageSize);
     Controller controller(cameras,initializer);
     
-    std::cout << "initialize" << std::endl;
     if(controller.initialize()){
-        std::cout << "initialization is finished" << std::endl;
+        std::cout << "All settings have been completed." << std::endl;
     }
     
     while(true){

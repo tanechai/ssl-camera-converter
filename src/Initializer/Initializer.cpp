@@ -5,7 +5,17 @@ Initializer::Initializer(std::vector<cv::VideoCapture>& cameras, const double& r
 
 void Initializer::initializeIntrinsicParameters(const int& captureSize){
     
-    std::cout << "start IntrinsicParameters" << std::endl;
+    // ---内部パラメータ取得---
+    // カメラにキャリブレーションボードを向けてください。そして、コンソール上に”Find！”と表示されていることを確認し、何かしらのキーを押してください。
+    // キャリブレーションボードを様々な方向や角度、位置から見せて、同じことを指定の回数だけ繰り返してください。
+    // さらに、複数台のカメラがある場合はすべてのカメラで同じように繰り返してください。
+
+    std::cout << std::endl << "---Internal parameter acquisition---" << std::endl
+    << "Point the calibration board at the camera. Make sure that \"Find!\" is displayed on the console, and press any key." << std::endl
+    << "Repeat the same process for the specified number of times, showing the calibration board from different directions, angles, and positions." << std::endl
+    << "In addition, if you have multiple cameras, repeat the same process for all of them." << std::endl
+    << "------------------------------------" << std::endl;
+
     // 全カメラのキャリブレーションに用いる画像群
     std::vector<std::vector<cv::Mat>> allFrames;
 
@@ -15,39 +25,56 @@ void Initializer::initializeIntrinsicParameters(const int& captureSize){
         // 各カメラのキャリブレーションに用いる画像群
         std::vector<cv::Mat> frames;
 
-        std::cout << "press any key for capture image" << std::endl;
         // 画像を１枚ずつ指定数まで撮影
         for(int i = 0; i < captureSize;i++){
             cv::Mat frame;
-            std::cout << captureSize - i << " more times" << std::endl;
+            std::cout << "\r\r" << captureSize - i << " more times." << std::endl;
             while(true){
                 camera.read(frame);
                 cv::imshow("IntrinsicParameters",frame);
+                cv::Mat grayFrame;
+                std::vector<util::ImageCoordinates> corners(1);
+                cv::cvtColor(frame,grayFrame,cv::COLOR_RGB2GRAY);
+                if (cv::findChessboardCorners(grayFrame, patternSize_, corners)){
+                    std::cout << "\r" << "\e[42m" << "Find!" << "\e[m"<< std::string(20, ' ');
+                }else{
+                    std::cout << "\r" << "\e[41m" << "Not find!..." << "\e[m"<< std::string(20, ' ');
+                }
                 if(cv::waitKey(1)>0){
                     break;
                 }
             }
-            
-            
             frames.emplace_back(frame);
         }
 
         // 各カメラの画像群を挿入
         allFrames.emplace_back(frames);
     }
+    std::cout << std::endl << "Completed for all cameras." << std::endl;
+
 
     // 撮影した画像を元に内部パラメータを計算
     calibrater_.calculateIntrinsicParameters(allFrames);
 }
 
 void Initializer::initializeIntrinsicParameters(std::vector<cv::FileStorage>& fileStrages){
-    
-    std::cout << "load IntrinsicParameters" << std::endl;
     calibrater_.loadIntrinsicParameters(fileStrages);
-    
 }
 
 void Initializer::initializeExtrinsicParameters(){
+
+    // ---外部パラメータ取得---
+    // フィールドの中心にキャリブレーションボードを置き、カメラからキャリブレーションボードが見えるように設置してください。
+    // コンソール上に”Find！”と表示されていることを確認し、カメラをその位置で固定した後、何かしらのキーを押してください。
+    // キャリブレーションボードの位置から外部パラメータを計算します。
+    // 複数台のカメラがある場合はすべてのカメラで同じようにしてください。
+
+    std::cout << std::endl << "---External parameter acquisition---" << std::endl
+    << "Place the calibration board in the center of the field so that the calibration board is visible from the camera." << std::endl
+    << "Make sure \"Find!\" is displayed on the console. on the console, hold the camera in that position, and then press any key." << std::endl
+    << "This will calculate the external parameters from the position of the calibration board." << std::endl
+    << "If you have more than one camera, please do the same for all of them." << std::endl
+    << "------------------------------------" << std::endl;
 
     // 全カメラのキャリブレーションに用いる画像群
     std::vector<cv::Mat> allFrames;
@@ -58,7 +85,6 @@ void Initializer::initializeExtrinsicParameters(){
 
         cv::Mat frame;
 
-        std::cout << "press any key for capture image" << std::endl;
         while(true){
             camera.read(frame);
             cv::imshow("ExtrinsicParameters",frame);
@@ -66,21 +92,21 @@ void Initializer::initializeExtrinsicParameters(){
             std::vector<util::ImageCoordinates> corners(1);
             cv::cvtColor(frame,grayFrame,cv::COLOR_RGB2GRAY);
             if (cv::findChessboardCorners(grayFrame, patternSize_, corners)){
-                std::cout << "\r" << "\e[42m" << "find!" << "\e[m"<< std::string(20, ' ');
-                break;
+                std::cout << "\r" << "\e[42m" << "Find!" << "\e[m"<< std::string(20, ' ');
             }else{
-                std::cout << "\r" << "\e[41m" << "not find!..." << "\e[m"<< std::string(20, ' ');
+                std::cout << "\r" << "\e[41m" << "Not find!..." << "\e[m"<< std::string(20, ' ');
             }
             if(cv::waitKey(1)>0){
                 break;
             }
         }
-        //frame = cv::imread("../"+std::to_string(i)+".jpg");
         i++;
+        
         // 各カメラの画像を挿入
         allFrames.emplace_back(frame);
     }
-    
+    std::cout << std::endl << "Completed for all cameras." << std::endl;
+
     // 撮影した画像を元に外部パラメータを計算
     calibrater_.calculateExtrinsicParameters(allFrames);
 }
@@ -130,8 +156,18 @@ void Initializer::initializeDefaultFields(){
     for(auto& camera : cameras_){
 
         cv::Mat frame;
+        // ---フィールドの撮影---
+        // キャリブレーションボードをどかし、フィールドの上に何も置かないようにしてください。
+        // その状態で、何かしらのキーを押して撮影してください。
+        // 複数台カメラがある場合は同じように撮影を繰り返してください。
 
-        std::cout << "press any key for capture default field image" << std::endl;
+        std::cout << std::endl << "---Field shooting---" << std::endl
+        << "Move the calibration board out of the way and make sure nothing is placed on the field." << std::endl
+        << "In this state, press some key to take a picture." << std::endl
+        << "If you have multiple cameras, repeat the process in the same way." << std::endl
+        << "If you want to use the camera parameters file, press enter." << std::endl
+        << "------------------------------------" << std::endl;
+
         while(true){
             camera.read(frame);
             cv::imshow("DefaultFields",frame);

@@ -76,8 +76,6 @@ void CameraCalibrater::loadIntrinsicParameters(std::vector<cv::FileStorage>& fil
 
 // 外部パラメータの計算
 void CameraCalibrater::calculateExtrinsicParameters(std::vector<cv::Mat>& checkerImages){
-    //if(parameters_.cameraMatrix() == nullptr){}
-    std::cout << "extrinsic" << std::endl;
     // 各カメラごとの画像で計算
     for(int i = 0; i < checkerImages.size(); i++){
         // 画像座標系でのコーナー座標の取得

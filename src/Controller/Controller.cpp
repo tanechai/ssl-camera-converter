@@ -5,8 +5,7 @@ Controller::Controller(std::vector<cv::VideoCapture>& cameras, Initializer& init
 bool Controller::initialize(){
     
     const int CV_WAITKEY_ENTER = 13;
-    std::cout << "initialize IntrinsicParameters" << std::endl;
-    std::cout << "if you use xml files, please press the enter key" << std::endl;
+    std::cout << "If you want to use the camera parameters file, press enter." << std::endl;
     if(cv::waitKey() == CV_WAITKEY_ENTER){
         std::vector<cv::FileStorage> fileStrages;
 
@@ -24,13 +23,9 @@ bool Controller::initialize(){
         initializer_.initializeIntrinsicParameters(10);
     }
     
-    std::cout << "initialize ExtrinsicParameters" << std::endl;
     initializer_.initializeExtrinsicParameters();
-    std::cout << "initialize Homography" << std::endl;
     initializer_.initializeHomography();
-    std::cout << "initialize DefaultFields" << std::endl;
     initializer_.initializeDefaultFields();
-    std::cout << "initialize FieldRange" << std::endl;
     initializer_.initializeFieldRange();
     return true;
 }
