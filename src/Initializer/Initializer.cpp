@@ -151,22 +151,23 @@ void Initializer::initializeHomography(){
 
 void Initializer::initializeDefaultFields(){
     
+    // ---フィールドの撮影---
+    // キャリブレーションボードをどかし、フィールドの上に何も置かないようにしてください。
+    // その状態で、何かしらのキーを押して撮影してください。
+    // 複数台カメラがある場合は同じように撮影を繰り返してください。
+
+    std::cout << std::endl << "---Field shooting---" << std::endl
+    << "Move the calibration board out of the way and make sure nothing is placed on the field." << std::endl
+    << "In this state, press some key to take a picture." << std::endl
+    << "If you have multiple cameras, repeat the process in the same way." << std::endl
+    << "If you want to use the camera parameters file, press enter." << std::endl
+    << "------------------------------------" << std::endl;
+
     /// 各カメラでフィールドの画像を撮影 ///
 
     for(auto& camera : cameras_){
 
         cv::Mat frame;
-        // ---フィールドの撮影---
-        // キャリブレーションボードをどかし、フィールドの上に何も置かないようにしてください。
-        // その状態で、何かしらのキーを押して撮影してください。
-        // 複数台カメラがある場合は同じように撮影を繰り返してください。
-
-        std::cout << std::endl << "---Field shooting---" << std::endl
-        << "Move the calibration board out of the way and make sure nothing is placed on the field." << std::endl
-        << "In this state, press some key to take a picture." << std::endl
-        << "If you have multiple cameras, repeat the process in the same way." << std::endl
-        << "If you want to use the camera parameters file, press enter." << std::endl
-        << "------------------------------------" << std::endl;
 
         while(true){
             camera.read(frame);
